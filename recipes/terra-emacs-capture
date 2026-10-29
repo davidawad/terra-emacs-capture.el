@@ -1,0 +1,2 @@
+(terra-emacs-capture :fetcher github :repo "davidawad/terra-emacs-capture.el"
+                     :files ("terra-emacs-capture*.el"))

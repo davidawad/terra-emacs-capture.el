@@ -1,7 +1,8 @@
-;;; terra-emacs-test-helper.el --- shared setup for terra-emacs ERT -*- lexical-binding: t; -*-
+;;; terra-emacs-capture-test-helper.el --- shared setup for terra-emacs-capture ERT -*- lexical-binding: t; -*-
 
 ;;; Commentary:
-;; Load paths (the package, and the pinned test packages for eat and
+;; Load paths (the package, the engine from TERRA_EMACS_DIR or a sibling
+;; ../terra-emacs.el checkout, and the pinned test packages for eat and
 ;; persp-mode when present) and resets every suite uses.  Batch Emacs
 ;; has one 80x25 frame; tab-bar works there, and so does persp-mode.
 
@@ -16,13 +17,22 @@
 
 (add-to-list 'load-path (expand-file-name ".." terra-emacs-test-dir))
 
+(defconst terra-emacs-test-engine-dir
+  (expand-file-name (or (getenv "TERRA_EMACS_DIR")
+                        (expand-file-name "../../terra-emacs.el" terra-emacs-test-dir)))
+  "The terra-emacs checkout the exporter is tested against.")
+
+(add-to-list 'load-path terra-emacs-test-engine-dir)
+
 (defconst terra-emacs-test-packages
   (or (getenv "TERRA_EMACS_TEST_PACKAGES") "/opt/emacs-test-packages")
   "Where the pinned third-party test packages live.")
 
-(dolist (dir (list (expand-file-name "eat-0.9.4" terra-emacs-test-packages)
-                   (expand-file-name "external/pkg-persp-mode" terra-emacs-test-packages)))
-  (when (file-directory-p dir) (add-to-list 'load-path dir t)))
+(dolist (dir (append (list (expand-file-name "eat-0.9.4" terra-emacs-test-packages)
+                           (expand-file-name "external/pkg-persp-mode" terra-emacs-test-packages))
+                     ;; Or name the package directories, colon-separated.
+                     (split-string (or (getenv "TERRA_EMACS_TEST_LOAD_PATH") "") ":" t)))
+  (when (file-directory-p dir) (add-to-list 'load-path (expand-file-name dir) t)))
 
 (defun terra-emacs-test-have (feature)
   "Non-nil when FEATURE loads."
@@ -58,5 +68,5 @@
   "A fresh temporary directory (with a trailing slash)."
   (file-name-as-directory (make-temp-file "terra-emacs-test" t)))
 
-(provide 'terra-emacs-test-helper)
-;;; terra-emacs-test-helper.el ends here
+(provide 'terra-emacs-capture-test-helper)
+;;; terra-emacs-capture-test-helper.el ends here
